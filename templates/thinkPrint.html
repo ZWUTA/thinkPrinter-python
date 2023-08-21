@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+  {% block page_content %}
+<!-- 新 Bootstrap5 核心 CSS 文件 -->
+<link rel="stylesheet" href="../static/css/bootstrap.min.css">
+<!--  popper.min.js 用于弹窗、提示、下拉菜单 -->
+<script src="../static/popper.min.js"></script>
+<!-- 最新的 Bootstrap5 核心 JavaScript 文件 -->
+<script src="../static/js/bootstrap.min.js"></script>
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>思考·智慧打印</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        outline: none !important;
+      }
+      body {
+        background-color: #d8e3e7;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: center;
+        /* margin: 0 2em 0 2em; */
+      }
+
+      .title {
+        font-size: 50px;
+        margin-top: 1em;
+      }
+
+      /* Styles for screens smaller than 768px (mobile devices) */
+      @media (max-width: 767px) {
+        .title {
+          font-size: 30px;
+        }
+
+        /* Wrap the two parts of the title onto separate lines */
+        .title span {
+          display: block;
+        }
+
+        /* Hide the separator */
+        .title span:nth-child(2) {
+          display: none;
+        }
+        .uploadFile {
+          width: 90% !important;
+        }
+      }
+
+      p {
+        text-align: center;
+        font-size: 20px;
+        margin: 1em;
+      }
+
+      .uploadFile {
+        width: 20em;
+        height: 10em;
+        font-size: 20px;
+        background-color: #bed0dfa8;
+        border: none;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-radius: 2em;
+      }
+      .start {
+        height: 3em;
+        width: 15em;
+        background-color: lightsteelblue;
+        border: none;
+        margin-top: 3em;
+        border-radius: 2em;
+        font-size: 1em;
+      }
+      .start:hover {
+        background-color: rgb(150, 172, 202);
+      }
+      .start:active {
+        background-color: rgb(142, 159, 182);
+        transform: scale(0.99);
+      }
+      .fileInput {
+        display: none;
+      }
+    </style>
+  </head>
+
+  <body>
+    <h1 class="title">
+      <span>ThinkPrinter</span>
+      <span> | </span>
+      <!-- <span><br /></span> -->
+      <span>思考·智慧打印</span>
+    </h1>
+    <p>目前仅支持A4单面打印。支持多文件打印，采用同一参数打印。</p>
+    <p>【公告：word文档打印支持试运行中，重要文档仍建议上传pdf】</p>
+    <p>您的账户剩余可打印额度{{userInfo.upaperRemain}}张。</p>
+    <p>{% if printAlready %}
+      感谢您本次打印，文档共{{num_page}}页，本次打印消耗打印额度{{num_page}}张。<p></p>请在打印机取走您的文件，订书机在讲台上。
+      {% endif %}</p>
+    <button id="button" onclick="choseFile()" class="uploadFile">
+      点击这里上传您要打印的文件
+    </button>
+    <!-- display: none 为隐藏input按钮，因为它很难自定义样式，通过单击👆一个button来，模拟单击这个按钮 -->
+    <form method="POST" enctype="multipart/form-data">
+      <input class="start form-control" id="fileInput" name="file" type="file" multiple="multiple" accept=".pdf,.doc,.docx" style="display: none" />
+      <div class="input-group">
+        <span class="input-group-text" id="basic-addon3">打印份数</span>
+        <input type="text" class="form-control" text="1" placeholder="1" id="copies" name="copies" aria-describedby="basic-addon3">
+      </div>
+      <div class="input-group mb-3">
+        <input type="text" class="form-control" text="1" placeholder="1" aria-label="开始页码" name="page_0">
+        <span class="input-group-text">默认打印整个文档</span>
+        <input type="text" class="form-control" text="n" placeholder="n" aria-label="结束页码" name="page_1">
+      </div>
+    <button type="submit" class="start">开始打印</button>
+    </form>
+
+  </body>
+  <script>
+    // document.getElementById("fileInput").click();
+    // 单击id为button的按钮时，触发id为fileInput的input的click事件
+    function choseFile() {
+      document.getElementById("fileInput").click();
+    }
+    document
+      .getElementById("fileInput")
+      .addEventListener("change", function () {
+        var files = this.files;
+        if (files.length > 0) {
+          console.log(files);
+          var fileName = files[0].name;
+          var fileSize = files[0].size;
+          // 修改id="button"按钮的文本为文件名
+          document.getElementById("button").innerHTML = fileName;
+          console.log("Selected file:", fileName, "Size:", fileSize);
+          // 在此处执行上传文件的操作
+        }
+      });
+  </script>
+{% endblock %}
+</html>
