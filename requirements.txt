@@ -1,0 +1,9 @@
+flask
+flask_login
+flask_bootstrap
+flask_admin
+werkzeug
+cryptography
+pyPDF2
+pymysql
+pywin32

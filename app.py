@@ -47,12 +47,17 @@ class User(UserMixin):
         self.uid=user.get("uid")
         self.uname=user.get("uname")
         self.upass=user.get("upass")
-        self.utele=user.get("utele")
+        self.uemail=user.get("uemail")
         self.upaperRemain=user.get("upaperRemain")
         self.enabledUser=user.get("enabledUser")
     
     def checkPassword(uname, upass):
-        return CheckUserLogin(uname, upass)
+        status = CheckUserLogin(uname, upass)
+        self.uid=status.get("uid")
+        self.uemail=status.get("uemail")
+        self.upaperRemain=status.get("upaperRemain")
+        self.enabledUser=status.get("enabledUser")
+        return status
 
     def get_id(self):
         return self.uid
@@ -108,9 +113,9 @@ def signup():
         print(request.form)
         username = request.values.get('username').strip()
         password = request.values.get('password').strip()
-        utele=request.values.get('utele').strip()
+        uemail=request.values.get('uemail').strip()
         try:
-            res=CheckUserSignUp(username, password, utele)
+            res=CheckUserSignUp(username, password, uemail)
             if res:
                 # return render_template('default.html')
                 return redirect('/')
@@ -132,28 +137,32 @@ def errPage():
 @login_required
 def thinkPrint():
     if request.method=='POST':
-        for file in request.files.getlist('file'):
-            copies = request.values.get('copies').strip()
-            copies = 1 if copies =='' else int(copies)
-            page_0=request.values.get('page_0').strip()
-            page_1=request.values.get('page_1').strip()
-            appPath="C:/projects/thinkPrinter/"   #   os.path.dirname(__file__)
-            thisPath=''
+        fileList = request.files.getlist('file')
+        ptime = int(time.time()*1000)
+        copies = request.values.get('copies').strip()
+        copies = 1 if copies =='' else int(copies)
+        page_0=request.values.get('page_0').strip()
+        page_1=request.values.get('page_1').strip()
+        appPath="C:/projects/thinkPrinter-python/"   #   os.path.dirname(__file__)
+        thisPath=''
+        for idx in range(len(fileList)):
+            file = fileList[idx]
+            
             suffix = os.path.splitext(file.filename)[-1]
+            fptime = f'{ptime}_{idx}'
             print(suffix)
-            ptime = int(time.time()*1000)
             if suffix=='.doc':
-                thisPath=appPath+"static/uploads/print_{}.doc".format(ptime)
+                thisPath=appPath+"static/uploads/print_{}.doc".format(fptime)
                 file.save(thisPath)
                 print(1,thisPath)
                 doc2pdf(thisPath)
                 thisPath=thisPath[:-3]+'pdf'
             elif suffix=='.pdf':
-                thisPath=appPath+"static/uploads/print_{}.pdf".format(ptime)
+                thisPath=appPath+"static/uploads/print_{}.pdf".format(fptime)
                 print(2,thisPath)
                 file.save(thisPath)
             elif suffix=='.docx':
-                thisPath=appPath+"static/uploads/print_{}.docx".format(ptime)
+                thisPath=appPath+"static/uploads/print_{}.docx".format(fptime)
                 print(3,thisPath)
                 file.save(thisPath)
                 docx2pdf(thisPath)
@@ -176,4 +185,4 @@ def thinkPrint():
 
 
 if __name__ == '__main__':
-    app.run(host="127.0.0.1", port=5206, debug=True)
+    app.run(host="0.0.0.0", port=3306, debug=False)

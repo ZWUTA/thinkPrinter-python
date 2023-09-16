@@ -5,16 +5,15 @@ import pythoncom
 from configparser import ConfigParser
 
 def generalSqlOpeartor(sql_cmd):
+    cfg = ConfigParser()
+    cfg.read("config.conf")
+    db_cfg = dict(cfg.items("database"))
+    db_cfg['port'] = int(db_cfg['port'])
+    db=pymysql.connect(**db_cfg)
+    cursor=db.cursor()
     try:
-        cfg = ConfigParser()
-        cfg.read("config.conf")
-        db_cfg = dict(cfg.items("database"))
-
-        db=pymysql.connect(**db_cfg)
-        cursor=db.cursor()
         cursor.execute(sql_cmd)
         db.commit()
-
         results = cursor.fetchall()
         return results
     except Exception as err:
@@ -22,22 +21,23 @@ def generalSqlOpeartor(sql_cmd):
         raise err
     finally:
         db.close()
-        return None
     
 def CheckUserLogin(username, password):
     status={
         'status':'False',
-        'sname':'',
         'uid':'',
-        'sid':''
+        'uname':'',
+        'uemail':'',
+        'enabledUser':-1
     }
     try:
-        results = generalSqlOpeartor('select UId, Sid, Sname from users where username="{}" and password="{}";'.format(username,password))
+        results = generalSqlOpeartor(f'''select `uid`, `uname`, `uemail`, `enabledUser` from printeruser where uname = '{username}' and upass = substr(MD5("{password}"),9,16);''')
         if len(results)==1:
             status['status']=True
             status['uid']=results[0][0]
-            status['sid']=results[0][1]
-            status['sname']=results[0][2]
+            status['uname']=results[0][1]
+            status['uemail']=results[0][2]
+            status['enabledUser']=results[0][3]
             return status
     except Exception as err:
         print(err)
@@ -45,10 +45,11 @@ def CheckUserLogin(username, password):
     return status
 
 
-def CheckUserSignUp(username, password, utele):
+def CheckUserSignUp(username, password, uemail):
 
     try:
-        results = generalSqlOpeartor('select UId, Sid, Sname from users where username="{}" and password="{}";'.format(username,password))
+        results = generalSqlOpeartor(f'''insert into printeruser (`uname`, `upass`, `uemail`, `upaperRemain`) 
+values('{username}', substr(MD5("{password}"),9,16),'{uemail}',0);''')
     except Exception as err:
         print(err)
         return False
@@ -60,12 +61,12 @@ def CheckUserSignUp(username, password, utele):
 def costBalance(uid, cost, ptime, filename):
     try:
         generalSqlOpeartor("update printerUser set upaperRemain = upaperRemain - {} where `uid`= {} ; ".format(cost,uid))
-        generalSqlOpeartor("insert into printlog (`printtime` ,`uid` ,`printPaper` ,`printFilename`) values('{}',{},{},'{}') ; ".format(ptime,uid,cost,filename))
+        generalSqlOpeartor("insert into printerlog (`printtime` ,`uid` ,`printPaper` ,`printFilename`) values('{}',{},{},'{}') ; ".format(ptime,uid,cost,filename))
     except Exception as err:
         print(err)
         raise err
 
-def get(user_id):
+def get_from_id(user_id):
         status={
             'uname':'',
             'uid':user_id,
@@ -77,10 +78,10 @@ def get(user_id):
         if not user_id:
             return None
         try:
-            results = generalSqlOpeartor('select uid, utele, upaperRemain, enabledUser, isadmin from printerUser where uid="{}";'.format(user_id))
+            results = generalSqlOpeartor('select uid, uemail, upaperRemain, enabledUser, isadmin from printerUser where uid="{}";'.format(user_id))
             if len(results)==1:
                 status['uid']=results[0][0]
-                status['utele']=results[0][1]
+                status['uemail']=results[0][1]
                 status['upaperRemain']=results[0][2]
                 status['enabledUser']=results[0][3]
                 status['isadmin']=results[0][4]
@@ -91,15 +92,16 @@ def get(user_id):
         return None
 
 def printfile(filename="",page_0='1',page_1='n',copies=1):
-    cfg = ConfigParser()
-    cfg.read("config.conf")
-    db_cfg = dict(cfg.items("database"))
-
+    tmpcfg = ConfigParser()
+    tmpcfg.read("config.conf")
+    tmpdb_cfg = dict(tmpcfg.items("printer"))
     page_0 = '1' if page_0 =='' else page_0
     page_1 = 'n' if page_1 =='' else page_1
     
-    pcommand = 'SumatraPdf.exe -print-to "{}" -print-settings "{}-{},{}x" "{}"'.format(db_cfg['printername'],page_0, page_1, copies, filename)
-    print(pcommand)
+    pcommand = 'SumatraPdf.exe -print-to "{}" -print-settings "{}-{},{}x" "{}"'.format(tmpdb_cfg['printername'],page_0, page_1, copies, filename)
+    os.system(pcommand)
+
+
 
 
 
