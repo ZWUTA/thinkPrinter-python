@@ -34,7 +34,7 @@ f'''create table IF NOT EXISTS printerlog(
 `printPaper` int default -1,
 `printFilename` varchar(30) );''',
 f'''insert into printeruser (`uname`, `upass`, `uemail`, `upaperRemain`, `enabledUser`,`isadmin`) 
-values('admin', substr(MD5("zhrnbnbnb666"),9,16),'hangshuicheung@outlook.com',114514,1,1);'''
+values('admin', substr(MD5("admin123456"),9,16),'ITechAssociation@outlook.com',114514,1,1);'''
 ]
 for i in sqlcmd:
     generalSqlOpeartor(i)
