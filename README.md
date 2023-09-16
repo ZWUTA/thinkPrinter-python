@@ -1,5 +1,5 @@
 # thinkPrinter-python
-思考·智慧打印，thinkprinter-go的python版本。jwb现行打印系统
+思考·智慧打印，一个目前仅支持Windows的多用户在线打印系统，python-flask开发，thinkprinter-go的python版本。jwb现行打印系统。
 
 ## 系统设计和打印逻辑
 
