@@ -23,3 +23,5 @@ MySQL数据库的基本的用户登录与权限管理功能+SumatraPdf的命令�
 
 这里端口号记得改成合适的。
 ```app.run(host="0.0.0.0", port=3306, debug=False)```
+
+首次运行前请先运行```database.py```安装数据库。初始的账号和密码为admin和admin123456。后台正在制作中。
